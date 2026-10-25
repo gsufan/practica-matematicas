@@ -55,6 +55,9 @@ body {
   background: var(--bg);
   color: var(--ink);
   font: 16px/1.55 var(--font);
+}
+.main {
+  min-width: 0;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
   padding-top: max(16px, env(safe-area-inset-top, 0px));
@@ -254,9 +257,11 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outlin
 
 /* Wide screens: use more of the width */
 @media (min-width: 900px) {
-  :root { --sheet-w: 58rem; }
-  body { padding-top: 24px; }
+  :root { --sheet-w: 84rem; }
+  .main { padding-left: 32px; padding-right: 32px; padding-top: 24px; }
   .sheet { gap: 20px; }
+  .lesson-page { max-width: 76rem; }
+  .practice-page { max-width: 68rem; }
   h1 { font-size: 3rem; }
   .masthead .lead { font-size: 1.2rem; }
   .resume { padding: 32px 36px 30px; }
@@ -271,4 +276,95 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outlin
 
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
+}
+
+/* App shell: sidebar + content */
+.app { display: grid; grid-template-columns: minmax(0, 1fr); }
+.topbar { gap: 12px; }
+.brand { margin-right: auto; }
+
+#menu-toggle {
+  display: grid; place-items: center; width: 44px; height: 44px; padding: 0;
+  border-radius: 14px; background: var(--card); border: 1px solid var(--line); color: var(--ink);
+  box-shadow: var(--shadow);
+}
+#menu-toggle svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+
+.sidebar {
+  position: fixed; z-index: 30; inset: 0 auto 0 0; width: min(20rem, 86vw);
+  background: var(--card); border-right: 1px solid var(--line); box-shadow: var(--shadow);
+  transform: translateX(-105%); visibility: hidden;
+  transition: transform .2s ease, visibility .2s;
+}
+body[data-sidebar="open"] .sidebar { transform: none; visibility: visible; }
+.side-scroll { height: 100%; overflow-y: auto; padding: 16px 12px 32px; overscroll-behavior: contain; }
+.side-top { display: flex; align-items: center; justify-content: space-between; padding: 4px 10px 12px; }
+.side-title { font-size: .72rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.side-close { width: 36px; height: 36px; padding: 0; border-radius: 10px; }
+
+.side-link, .side-module, .side-topic {
+  display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink);
+  border-radius: 12px;
+}
+.side-link { padding: 10px 12px; font-weight: 800; }
+.side-group { margin-top: 4px; }
+.side-group summary { list-style: none; cursor: pointer; border-radius: 12px; }
+.side-group summary::-webkit-details-marker { display: none; }
+.side-head { display: flex; align-items: center; gap: 8px; padding: 0 12px 0 0; }
+.side-module { flex: 1; min-width: 0; padding: 10px 12px; font-weight: 800; }
+.side-count, .side-soon { font-size: .75rem; font-weight: 800; color: var(--muted); font-variant-numeric: tabular-nums; }
+.side-group summary { position: relative; }
+.side-group summary .side-head { padding-right: 36px; }
+.side-group summary::after {
+  content: ""; position: absolute; right: 16px; top: 50%; width: 8px; height: 8px; margin-top: -6px;
+  border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); transition: transform .15s;
+}
+.side-group[open] > summary::after { transform: rotate(-135deg); margin-top: -2px; }
+.side-group:not([data-module]) .side-module { color: var(--muted); }
+.side-topics { display: grid; gap: 2px; padding: 2px 0 8px 14px; }
+.side-topic { padding: 8px 12px; font-size: .9rem; font-weight: 600; color: var(--muted); }
+.side-topic.soon { opacity: .55; }
+a.side-topic:hover, .side-link:hover, .side-module:hover { background: var(--accent-soft); }
+.side-link.active, .side-module.active, .side-topic.active { background: var(--accent-soft); color: var(--accent-strong); font-weight: 800; }
+.dot { flex-shrink: 0; width: 9px; height: 9px; border-radius: 50%; border: 2px solid var(--line); }
+.dot.learning { background: var(--accent); border-color: var(--accent); }
+.dot.mastered { background: var(--ok); border-color: var(--ok); }
+
+.scrim { position: fixed; z-index: 20; inset: 0; background: rgba(8, 10, 24, .5); opacity: 0; pointer-events: none; transition: opacity .2s; }
+body[data-sidebar="open"] .scrim { opacity: 1; pointer-events: auto; }
+
+.module h2 a { color: inherit; text-decoration: none; }
+.module h2 a:hover { color: var(--accent-strong); }
+.empty { margin: 0; color: var(--muted); }
+
+/* Lessons: contents on the right on wide screens */
+.toc { display: none; }
+.lesson h2 { scroll-margin-top: 16px; }
+
+@media (min-width: 900px) {
+  /* sidebar sits in the page flow and pushes the content */
+  .sidebar { position: sticky; top: 0; height: 100vh; height: 100dvh; inset: auto; transform: none; visibility: visible; box-shadow: none; width: auto; }
+  body[data-sidebar="open"] .app { grid-template-columns: 19rem minmax(0, 1fr); }
+  body[data-sidebar="closed"] .sidebar { display: none; }
+  .side-close, .scrim { display: none; }
+}
+
+@media (min-width: 1200px) {
+  .lesson-layout { display: grid; grid-template-columns: minmax(0, 1fr) 15rem; gap: 28px; align-items: start; }
+  .toc {
+    display: grid; gap: 2px; position: sticky; top: 24px; align-self: start;
+    max-height: calc(100vh - 48px); overflow-y: auto; padding: 4px 0 4px 18px; border-left: 2px solid var(--line);
+  }
+  .toc-title { margin: 0 0 8px; font-size: .72rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .toc a { padding: 6px 10px; border-radius: 10px; font-size: .88rem; font-weight: 600; line-height: 1.35; color: var(--muted); text-decoration: none; }
+  .toc a:hover { background: var(--accent-soft); color: var(--ink); }
+  .toc a.active { background: var(--accent-soft); color: var(--accent-strong); font-weight: 800; }
+}
+
+/* Practice-only page: options on the left, problem on the right */
+@media (min-width: 1100px) {
+  #practice-root { grid-template-columns: 17rem minmax(0, 1fr); align-items: start; }
+  #practice-root .setup { flex-direction: column; align-items: stretch; grid-row: span 2; }
+  #practice-root .setup select { width: 100%; }
+  #practice-root .tally { grid-column: 2; }
 }

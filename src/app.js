@@ -1,6 +1,8 @@
-// Router and views. Routes: #/ (course map), #/tema/<id> (lesson), #/practica/<id> (practice only).
+// Router and views. Routes: #/ (course map), #/modulo/<id> (one module),
+// #/tema/<id> (lesson), #/practica/<id> (practice only).
 const view = document.getElementById("view");
-let mounted = null; // practice widget on screen, if any
+let mounted = null;      // practice widget on screen, if any
+let tocObserver = null;  // highlights the lesson section being read
 
 const STATUS_LABEL = { new: "Nuevo", learning: "En curso", mastered: "Dominado" };
 
@@ -31,11 +33,12 @@ function topicRow(topic, index, suggestedId) {
 function homeView() {
   const next = suggestedTopic();
   const modules = COURSE.map((m) => {
+    const heading = `<h2><a href="#/modulo/${m.id}">${m.title}</a></h2>`;
     if (m.topics.length === 0) {
-      return `<section class="module soon"><h2>${m.title}</h2><p>${m.summary}</p><span class="badge soon">Próximamente</span></section>`;
+      return `<section class="module soon">${heading}<p>${m.summary}</p><span class="badge soon">Próximamente</span></section>`;
     }
     const rows = m.topics.map((t, i) => topicRow(t, i, next && next.id)).join("");
-    return `<section class="module"><h2>${m.title}</h2><p>${m.summary}</p><div class="rows">${rows}</div></section>`;
+    return `<section class="module">${heading}<p>${m.summary}</p><div class="rows">${rows}</div></section>`;
   }).join("");
 
   const resume = next
@@ -57,6 +60,25 @@ function homeView() {
     ${modules}`;
 }
 
+function moduleView(id) {
+  const module = COURSE.find((m) => m.id === id);
+  if (!module) return notFoundView();
+
+  const next = suggestedTopic();
+  const body = module.topics.length
+    ? `<section class="module"><div class="rows">${module.topics.map((t, i) => topicRow(t, i, next && next.id)).join("")}</div></section>`
+    : `<section class="module"><p class="empty">Este módulo todavía no tiene temas. Se agregarán después de terminar los anteriores.</p></section>`;
+
+  view.innerHTML = `
+    <nav class="crumbs"><a href="#/">← Curso</a></nav>
+    <header class="masthead">
+      <p class="kicker">Módulo</p>
+      <h1>${module.title}</h1>
+      <p class="lead">${module.summary}</p>
+    </header>
+    ${body}`;
+}
+
 function lessonView(id) {
   const topic = findTopic(id);
   if (!topic || !isReady(id)) return notFoundView();
@@ -64,14 +86,19 @@ function lessonView(id) {
 
   const lesson = LESSONS[id];
   view.innerHTML = `
-    <nav class="crumbs"><a href="#/">← Curso</a></nav>
+    <nav class="crumbs"><a href="#/modulo/${topic.module.id}">← ${topic.module.title}</a></nav>
     <header class="masthead">
       <p class="kicker">${topic.module.title}</p>
       <h1>${topic.title}</h1>
       <p class="lead">Lectura de unos ${lesson.minutes} minutos, con práctica al final.</p>
     </header>
-    <article class="lesson">${renderRich(lesson.body)}</article>
+    <div class="lesson-layout">
+      <article class="lesson">${renderRich(lesson.body)}</article>
+      <nav class="toc" aria-label="En esta lección"></nav>
+    </div>
     <p class="fullscreen-link"><a href="#/practica/${id}">Abrir la práctica en pantalla completa →</a></p>`;
+
+  buildToc(id);
 
   const slot = view.querySelector("[data-practice]");
   if (slot) {
@@ -79,6 +106,40 @@ function lessonView(id) {
     slot.setAttribute("data-no-autofocus", "");
     mounted = mountPractice(slot, GENERATORS[id], { topicId: id });
   }
+}
+
+// Table of contents from the lesson's headings; highlights the one being read
+function buildToc(id) {
+  const heads = [...view.querySelectorAll(".lesson h2")];
+  const toc = view.querySelector(".toc");
+  const label = (h) => {
+    const copy = h.cloneNode(true);
+    copy.querySelectorAll(".katex-mathml").forEach((n) => n.remove());
+    return copy.textContent;
+  };
+  heads.forEach((h, i) => (h.id = `sec-${i}`));
+  toc.innerHTML =
+    '<p class="toc-title">En esta lección</p>' +
+    heads.map((h, i) => `<a href="#/tema/${id}" data-section="sec-${i}">${label(h)}</a>`).join("");
+
+  toc.addEventListener("click", (event) => {
+    const link = event.target.closest("a[data-section]");
+    if (!link) return;
+    event.preventDefault(); // the hash belongs to the router
+    const smooth = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    document.getElementById(link.dataset.section).scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "start" });
+  });
+
+  tocObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        toc.querySelectorAll("a").forEach((a) => a.classList.toggle("active", a.dataset.section === entry.target.id));
+      });
+    },
+    { rootMargin: "-10% 0px -80% 0px" }
+  );
+  heads.forEach((h) => tocObserver.observe(h));
 }
 
 function practiceView(id) {
@@ -93,17 +154,29 @@ function practiceView(id) {
 }
 
 function notFoundView() {
-  view.innerHTML = '<nav class="crumbs"><a href="#/">← Curso</a></nav><p>Ese tema no existe todavía.</p>';
+  view.innerHTML = '<nav class="crumbs"><a href="#/">← Curso</a></nav><p>Esa página no existe todavía.</p>';
 }
 
 function route() {
   if (mounted) mounted.destroy();
   mounted = null;
+  if (tocObserver) tocObserver.disconnect();
+  tocObserver = null;
 
   const [, page, id] = location.hash.split("/");
+  const topic = page === "tema" || page === "practica" ? findTopic(id) : null;
+  view.className = "sheet" + (page === "tema" ? " lesson-page" : page === "practica" ? " practice-page" : "");
+
   if (page === "tema") lessonView(id);
   else if (page === "practica") practiceView(id);
+  else if (page === "modulo") moduleView(id);
   else homeView();
+
+  renderSidebar({
+    home: !page,
+    module: page === "modulo" ? id : topic ? topic.module.id : null,
+    topic: topic ? topic.id : null,
+  });
   window.scrollTo(0, 0);
 }
 

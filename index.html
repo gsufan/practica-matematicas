@@ -22,7 +22,13 @@
   </script>
 </head>
 <body>
+  <div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Secciones del curso"></aside>
+  <div class="main">
   <header class="topbar">
+    <button type="button" id="menu-toggle" aria-label="Mostrar u ocultar las secciones" aria-controls="sidebar" aria-expanded="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
     <a class="brand" href="#/" aria-label="Mates, ir al inicio">
       <svg width="34" height="34" viewBox="0 0 36 36" aria-hidden="true">
         <rect class="logo-bg" width="36" height="36" rx="10"/>
@@ -37,6 +43,9 @@
     </button>
   </header>
   <main class="sheet" id="view"></main>
+  </div>
+  </div>
+  <div class="scrim" id="scrim"></div>
 
   <!-- Classic scripts, so the page also works when opened from disk -->
   <script src="vendor/katex/katex.min.js"></script>
@@ -65,6 +74,7 @@
   <script src="src/generators/logarithms.js"></script>
   <script src="src/practice.js"></script>
   <script src="src/theme.js"></script>
+  <script src="src/nav.js"></script>
   <script src="src/app.js"></script>
   <script>
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");

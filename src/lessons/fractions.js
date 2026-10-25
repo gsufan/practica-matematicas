@@ -5,7 +5,7 @@ LESSONS["fractions"] = {
 
 Una **fracción** escribe una parte de un todo. Si divides una pizza en 8 trozos iguales y comes 3, comiste $\\frac{3}{8}$ de la pizza:
 
-$$\\frac{3}{8} \\quad \\leftarrow \\text{numerador: cuántas partes tomas} \\qquad \\text{denominador: en cuántas partes se divide el todo}$$
+$$\\frac{\\text{numerador}}{\\text{denominador}} = \\frac{3}{8}$$
 
 El **denominador** nombra el tamaño de las partes (octavos, tercios, quintos) y el **numerador** cuenta cuántas hay. Por eso el denominador nunca puede ser cero: no existe un reparto en cero partes.
 

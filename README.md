@@ -20,10 +20,12 @@ src/course.js                    COURSE map, LESSONS and GENERATORS registries
 src/lessons/<topic>.js           Theory for one topic
 src/generators/<topic>.js        Problem generator for one topic
 src/practice.js                  Practice widget (used inside lessons and on its own page)
+src/theme.js                     Light/dark toggle (follows the system until chosen)
+src/nav.js                       Collapsible sidebar with modules and topics
 src/app.js                       Router and views
 ```
 
-Rutas: `#/` (mapa del curso), `#/tema/<id>` (lección con práctica incrustada), `#/practica/<id>` (solo práctica).
+Rutas: `#/` (mapa del curso), `#/modulo/<id>` (un módulo), `#/tema/<id>` (lección con práctica incrustada), `#/practica/<id>` (solo práctica).
 
 ## Agregar un tema
 
