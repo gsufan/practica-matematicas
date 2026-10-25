@@ -1,5 +1,5 @@
 // Cache-first service worker. Bump VERSION to force clients to refresh.
-const VERSION = "v3";
+const VERSION = "v4";
 const CACHE = "mates-" + VERSION;
 const ASSETS = [
   "./",
@@ -38,7 +38,12 @@ const ASSETS = [
 ];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(ASSETS)));
+  // cache: "reload" skips the HTTP cache so stale files never get stored
+  event.waitUntil(
+    caches.open(CACHE).then((cache) =>
+      cache.addAll(ASSETS.map((url) => new Request(url, { cache: "reload" })))
+    )
+  );
   self.skipWaiting();
 });
 
