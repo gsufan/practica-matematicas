@@ -1,10 +1,11 @@
 // Cache-first service worker. Bump VERSION to force clients to refresh.
-const VERSION = "v2";
+const VERSION = "v3";
 const CACHE = "mates-" + VERSION;
 const ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
+  "./vendor/fonts/plus-jakarta-sans-latin.woff2",
   "./manifest.webmanifest",
   "./src/math.js",
   "./src/generators/times-tables.js",
