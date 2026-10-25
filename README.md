@@ -38,5 +38,6 @@ El tema ya está listado en `COURSE` (`src/course.js`). Para activarlo:
 ## Status
 
 - [x] Aritmética: tablas de multiplicar (directo e inverso)
-- [ ] Aritmética: operaciones con enteros, fracciones, decimales, porcentajes, potencias, notación científica, logaritmos
+- [x] Aritmética: enteros y negativos
+- [ ] Aritmética: orden de operaciones, fracciones, decimales, porcentajes, potencias, notación científica, logaritmos
 - [ ] Módulos posteriores: álgebra, geometría, funciones, álgebra lineal, precálculo, cálculo
