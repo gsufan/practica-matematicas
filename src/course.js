@@ -9,6 +9,7 @@ const COURSE = [
     title: "Aritmética",
     summary: "Los números y sus operaciones, hasta llegar a los logaritmos.",
     topics: [
+      { id: "number-sets", title: "Los números y sus conjuntos", summary: "Qué es un número y los reinos: naturales, enteros, racionales, irracionales y reales." },
       { id: "times-tables", title: "Tablas de multiplicar", summary: "Multiplicar de memoria y entender por qué funciona." },
       { id: "integers", title: "Enteros y negativos", summary: "Sumar, restar y multiplicar con signos." },
       { id: "order-of-operations", title: "Orden de operaciones", summary: "Qué se calcula primero en una expresión." },

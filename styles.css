@@ -102,9 +102,10 @@ fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
 .problem-label { margin: 0; font-size: .85rem; font-weight: 600; color: var(--muted); }
 .equation {
   margin: 12px 0 24px; padding: 20px 8px; min-height: 5.5rem;
-  display: flex; align-items: center; justify-content: center;
+  display: flex; align-items: center;
   background: var(--accent-soft); border-radius: 16px; overflow-x: auto;
 }
+.equation > * { margin: auto; }
 .equation .katex { font-size: 2.4em; }
 
 .answer { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
