@@ -1,5 +1,5 @@
 // Cache-first service worker. Bump VERSION to force clients to refresh.
-const VERSION = "v1";
+const VERSION = "v2";
 const CACHE = "mates-" + VERSION;
 const ASSETS = [
   "./",
