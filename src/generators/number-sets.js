@@ -3,6 +3,7 @@
 const numberSetsGenerator = {
   id: "number-sets",
   name: "Los números y sus conjuntos",
+  keyboard: "numeric",
 
   controls: [
     {

@@ -3,6 +3,7 @@
 const timesTablesGenerator = {
   id: "times-tables",
   name: "Tablas de multiplicar",
+  keyboard: "numeric",
 
   controls: [
     {

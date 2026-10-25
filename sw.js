@@ -1,5 +1,5 @@
 // Network-first service worker: always fresh online, cached copy offline. Bump VERSION to force clients to refresh.
-const VERSION = "v9";
+const VERSION = "v10";
 const CACHE = "mates-" + VERSION;
 const ASSETS = [
   "./",

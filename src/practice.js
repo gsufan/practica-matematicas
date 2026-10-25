@@ -118,6 +118,8 @@ function mountPractice(root, generator, { topicId, timer: withTimer = true } = {
     els.label.textContent = current.label;
     els.equation.innerHTML = renderMath(current.equation);
     els.input.value = "";
+    els.input.inputMode = generator.keyboard || "text";
+    els.input.placeholder = current.placeholder || "";
     els.steps.hidden = true;
     els.steps.innerHTML = "";
     els.stepsBtn.textContent = "Ver pasos";
@@ -129,10 +131,17 @@ function mountPractice(root, generator, { topicId, timer: withTimer = true } = {
   function checkAnswer() {
     const raw = els.input.value.trim();
     if (raw === "") return showFeedback("Escribe una respuesta.", null);
-    if (!/^-?\d+$/.test(raw)) return showFeedback("Escribe solo un número entero.", null);
+    const kind = current.kind || "integer";
+    const parsed = parseAnswer(raw, kind);
+    if (parsed.error) return showFeedback(parsed.error, null);
+
+    const equal = sameValue(parsed.value, current.answer);
+    if (kind === "fraction" && equal && !parsed.simplified) {
+      return showFeedback("Es equivalente, pero falta simplificar la fracción.", null);
+    }
 
     const seconds = stopTimer();
-    const correct = Number(raw) === current.answer;
+    const correct = equal;
     if (!current.counted) {
       current.counted = true;
       store.recordAttempt(topicId, correct);

@@ -215,3 +215,15 @@ a.row:hover { background: var(--accent-soft); }
 @media (max-width: 480px) {
   .lesson { padding: 4px 16px 20px; font-size: 1rem; }
 }
+
+/* Wide screens: use more of the width */
+@media (min-width: 900px) {
+  body { padding-top: 40px; }
+  .sheet { max-width: 58rem; gap: 20px; }
+  h1 { font-size: 2.5rem; }
+  .lesson { padding: 16px 48px 36px; font-size: 1.15rem; line-height: 1.75; }
+  .lesson h2 { font-size: 1.5rem; }
+  .problem { padding: 32px 36px 28px; }
+  .setup { padding: 20px 36px; }
+  .equation .katex { font-size: 2.8em; }
+}
