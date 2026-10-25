@@ -109,12 +109,12 @@ fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
 
 .answer { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
 .answer .field { flex-basis: 100%; }
-#answer-input {
+.answer input {
   width: 9rem; padding: 10px 14px;
   font: 700 1.6rem var(--font); font-variant-numeric: tabular-nums; color: var(--ink);
   background: var(--bg); border: 2px solid var(--line); border-radius: 14px;
 }
-#answer-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+.answer input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
 
 button {
   font: inherit; font-weight: 700; color: var(--ink);
@@ -150,5 +150,67 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   h1 { font-size: 1.6rem; }
   .problem { padding: 22px 16px 18px; }
   .equation .katex { font-size: 2em; }
-  #answer-input { flex: 1; width: auto; min-width: 0; }
+  .answer input { flex: 1; width: auto; min-width: 0; }
+}
+
+/* Course views */
+a { color: var(--accent-strong); }
+.lead { margin: 10px 0 0; color: var(--muted); max-width: 34rem; }
+.crumbs { padding: 0 4px; font-size: .9rem; font-weight: 600; }
+.crumbs a { text-decoration: none; }
+
+.resume {
+  display: grid; gap: 4px; padding: 20px 22px; border-radius: 20px;
+  background: var(--accent); color: var(--accent-ink); text-decoration: none; box-shadow: var(--shadow);
+}
+.resume strong { font-size: 1.3rem; letter-spacing: -.01em; }
+.resume .kicker { justify-self: start; margin: 0 0 4px; background: rgba(255, 255, 255, .2); color: inherit; }
+
+.module { background: var(--card); border-radius: 20px; box-shadow: var(--shadow); padding: 22px 20px 12px; }
+.module h2 { margin: 0; font-size: 1.25rem; letter-spacing: -.01em; }
+.module > p { margin: 4px 0 12px; color: var(--muted); font-size: .92rem; }
+.module.soon { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; padding-bottom: 18px; opacity: .75; }
+.module.soon > p { margin: 0; flex: 1 1 12rem; }
+
+.rows { display: grid; }
+.row {
+  display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; align-items: start;
+  padding: 14px 8px; border-top: 1px solid var(--line); color: var(--ink); text-decoration: none; border-radius: 12px;
+}
+a.row:hover { background: var(--accent-soft); }
+.row.disabled { opacity: .55; }
+.row-num {
+  display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: 50%;
+  background: var(--accent-soft); color: var(--accent-strong); font-weight: 700; font-size: .85rem;
+}
+.row-text { display: grid; gap: 2px; }
+.row-text span { color: var(--muted); font-size: .88rem; }
+.row-text .row-meta { color: var(--accent-strong); font-weight: 600; }
+.row-badges { grid-column: 2; display: flex; flex-wrap: wrap; gap: 6px; }
+
+.badge {
+  display: inline-block; padding: 2px 10px; border-radius: 999px;
+  font-size: .72rem; font-weight: 700; background: var(--bg); color: var(--muted);
+}
+.badge.learning { background: var(--accent-soft); color: var(--accent-strong); }
+.badge.mastered { background: var(--ok-soft); color: var(--ok); }
+.badge.next { background: var(--warm); color: #3a2a05; }
+
+/* Lessons */
+.lesson { background: var(--card); border-radius: 20px; box-shadow: var(--shadow); padding: 12px 24px 24px; font-size: 1.05rem; line-height: 1.7; }
+.lesson h2 { margin: 32px 0 4px; font-size: 1.3rem; letter-spacing: -.01em; }
+.lesson p, .lesson ul { margin: 12px 0; }
+.lesson ul { padding-left: 1.3rem; }
+.lesson li { margin: 6px 0; }
+.display-math { margin: 14px 0; overflow-x: auto; padding: 4px 0; }
+.note {
+  margin: 16px 0; padding: 12px 16px; border-radius: 12px;
+  background: var(--accent-soft); border-left: 4px solid var(--warm);
+}
+.embed, #practice-root { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; margin-top: 16px; }
+.embed .setup, .embed .problem { box-shadow: none; border: 1px solid var(--line); }
+.fullscreen-link { margin: 0; padding: 0 4px; font-weight: 600; font-size: .92rem; }
+
+@media (max-width: 480px) {
+  .lesson { padding: 4px 16px 20px; font-size: 1rem; }
 }

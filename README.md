@@ -11,23 +11,29 @@ Práctica interactiva de matemáticas desde aritmética hasta logaritmos.
 ## Estructura
 
 ```
-index.html                    Page markup
-styles.css                    Styles (color tokens at the top)
-src/math.js                   Shared helpers: randInt, renderMath (KaTeX)
-src/generators/times-tables.js  One generator per subtopic
-src/app.js                    UI logic and state; registers subtopics
+index.html                       Shell; loads scripts in order
+styles.css                       Styles (color tokens at the top)
+sw.js, manifest.webmanifest      PWA: offline fallback, installable
+src/math.js                      randInt, renderMath, renderRich (lesson markup)
+src/store.js                     Progress in localStorage
+src/course.js                    COURSE map, LESSONS and GENERATORS registries
+src/lessons/<topic>.js           Theory for one topic
+src/generators/<topic>.js        Problem generator for one topic
+src/practice.js                  Practice widget (used inside lessons and on its own page)
+src/app.js                       Router and views
 ```
 
-Each generator returns `{ label, equation, answer, steps }`:
+Rutas: `#/` (mapa del curso), `#/tema/<id>` (lección con práctica incrustada), `#/practica/<id>` (solo práctica).
 
-- `equation` and `steps` are LaTeX strings. A `?` becomes a blank box.
-- `answer` is the number the student must enter.
+## Agregar un tema
 
-## Adding a subtopic
+El tema ya está listado en `COURSE` (`src/course.js`). Para activarlo:
 
-1. Create `src/generators/<name>.js` with an object that has a `generate({ table, mode })` method.
-2. Add a `<script>` tag for it in `index.html`, before `src/app.js`.
-3. Add the object to `SUBTOPICS` in `src/app.js`.
+1. Crear `src/lessons/<id>.js` con `LESSONS["<id>"] = { minutes, body }`. El cuerpo usa un markup simple: `## título`, `- lista`, `> nota`, `$matemática$`, `$$bloque$$` y `{{practice}}` donde va la práctica.
+2. Crear `src/generators/<id>.js` con `controls` (selects o radios) y `generate(options)`, que devuelve `{ label, equation, answer, steps }`. Registrarlo con `GENERATORS["<id>"] = ...`.
+3. Agregar ambos `<script>` en `index.html` y las dos rutas en la lista de `sw.js`. Subir `VERSION` en `sw.js`.
+
+`equation` y `steps` son LaTeX; un `?` se muestra como casilla vacía.
 
 ## Status
 

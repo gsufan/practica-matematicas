@@ -12,54 +12,16 @@
   <link rel="apple-touch-icon" href="icons/icon-192.png">
 </head>
 <body>
-  <main class="sheet">
-    <header class="masthead">
-      <p class="kicker">Aritmética</p>
-      <h1>Práctica de matemáticas</h1>
-    </header>
-
-    <section class="setup" aria-label="Opciones de práctica">
-      <label class="field">Tabla
-        <select id="table-select"></select>
-      </label>
-      <fieldset>
-        <legend>Modo</legend>
-        <label class="radio"><input type="radio" name="mode" value="direct" checked> Directo</label>
-        <label class="radio"><input type="radio" name="mode" value="inverse"> Inverso</label>
-      </fieldset>
-      <label class="check"><input type="checkbox" id="timer-toggle"> Cronómetro</label>
-    </section>
-
-    <article class="problem">
-      <p class="problem-label" id="problem-label"></p>
-      <div class="equation" id="equation"></div>
-
-      <form class="answer" id="answer-form" autocomplete="off">
-        <label for="answer-input" class="field">Tu respuesta</label>
-        <input id="answer-input" inputmode="numeric" aria-describedby="feedback">
-        <button type="submit" class="primary">Validar</button>
-      </form>
-
-      <p class="feedback" id="feedback" role="status" aria-live="polite"></p>
-
-      <div class="actions">
-        <button type="button" id="steps-btn">Ver pasos</button>
-        <button type="button" id="next-btn">Siguiente</button>
-      </div>
-
-      <ol class="steps" id="steps" hidden></ol>
-      <p class="timer" id="timer" hidden></p>
-    </article>
-
-    <footer class="tally">
-      Aciertos <strong id="score-ok">0</strong> de <strong id="score-total">0</strong>
-    </footer>
-  </main>
+  <main class="sheet" id="view"></main>
 
   <!-- Classic scripts, so the page also works when opened from disk -->
   <script src="vendor/katex/katex.min.js"></script>
   <script src="src/math.js"></script>
+  <script src="src/store.js"></script>
+  <script src="src/course.js"></script>
+  <script src="src/lessons/times-tables.js"></script>
   <script src="src/generators/times-tables.js"></script>
+  <script src="src/practice.js"></script>
   <script src="src/app.js"></script>
   <script>
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");

@@ -1,5 +1,5 @@
 // Network-first service worker: always fresh online, cached copy offline. Bump VERSION to force clients to refresh.
-const VERSION = "v5";
+const VERSION = "v6";
 const CACHE = "mates-" + VERSION;
 const ASSETS = [
   "./",
@@ -8,7 +8,11 @@ const ASSETS = [
   "./vendor/fonts/plus-jakarta-sans-latin.woff2",
   "./manifest.webmanifest",
   "./src/math.js",
+  "./src/store.js",
+  "./src/course.js",
+  "./src/lessons/times-tables.js",
   "./src/generators/times-tables.js",
+  "./src/practice.js",
   "./src/app.js",
   "./vendor/katex/katex.min.js",
   "./vendor/katex/katex.min.css",

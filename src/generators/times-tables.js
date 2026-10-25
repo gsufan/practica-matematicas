@@ -4,6 +4,20 @@ const timesTablesGenerator = {
   id: "times-tables",
   name: "Tablas de multiplicar",
 
+  controls: [
+    {
+      id: "table", type: "select", label: "Tabla",
+      choices: [
+        { value: "mixed", label: "Mixta (2 a 12)" },
+        ...Array.from({ length: 11 }, (_, i) => ({ value: String(i + 2), label: `Tabla del ${i + 2}` })),
+      ],
+    },
+    {
+      id: "mode", type: "radio", label: "Modo",
+      choices: [{ value: "direct", label: "Directo" }, { value: "inverse", label: "Inverso" }],
+    },
+  ],
+
   generate({ table, mode }) {
     const a = table === "mixed" ? randInt(2, 12) : Number(table);
     const b = randInt(2, 12);
@@ -38,3 +52,5 @@ const timesTablesGenerator = {
     };
   },
 };
+
+GENERATORS[timesTablesGenerator.id] = timesTablesGenerator;

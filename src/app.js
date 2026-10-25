@@ -1,157 +1,100 @@
-// UI logic. Subtopics are registered here; each one adds its generator.
-const SUBTOPICS = [timesTablesGenerator];
-let activeSubtopic = SUBTOPICS[0];
+// Router and views. Routes: #/ (course map), #/tema/<id> (lesson), #/practica/<id> (practice only).
+const view = document.getElementById("view");
+let mounted = null; // practice widget on screen, if any
 
-const $ = (id) => document.getElementById(id);
-const els = {
-  table: $("table-select"),
-  timerToggle: $("timer-toggle"),
-  label: $("problem-label"),
-  equation: $("equation"),
-  form: $("answer-form"),
-  input: $("answer-input"),
-  feedback: $("feedback"),
-  stepsBtn: $("steps-btn"),
-  nextBtn: $("next-btn"),
-  steps: $("steps"),
-  timer: $("timer"),
-  ok: $("score-ok"),
-  total: $("score-total"),
-};
+const STATUS_LABEL = { new: "Nuevo", learning: "En curso", mastered: "Dominado" };
 
-let current = null;                    // problem being practiced
-const stats = { ok: 0, total: 0 };
-const timer = { id: null, start: 0, frozen: null };
-
-// Spanish decimal comma
-function formatSeconds(seconds) {
-  return seconds.toFixed(1).replace(".", ",");
+function topicRow(topic, index, suggestedId) {
+  const ready = isReady(topic.id);
+  const status = store.status(topic.id);
+  const t = store.topic(topic.id);
+  const badge = ready
+    ? `<span class="badge ${status}">${STATUS_LABEL[status]}</span>`
+    : '<span class="badge soon">Próximamente</span>';
+  const progress = ready && t.total > 0 ? `<span class="row-meta">${t.ok} de ${t.total} correctas</span>` : "";
+  const next = topic.id === suggestedId ? '<span class="badge next">Sigue este</span>' : "";
+  const inner = `
+    <span class="row-num">${index + 1}</span>
+    <span class="row-text"><strong>${topic.title}</strong><span>${topic.summary}</span>${progress}</span>
+    <span class="row-badges">${next}${badge}</span>`;
+  return ready
+    ? `<a class="row" href="#/tema/${topic.id}">${inner}</a>`
+    : `<div class="row disabled">${inner}</div>`;
 }
 
-function currentMode() {
-  return document.querySelector('input[name="mode"]:checked').value;
+function homeView() {
+  const next = suggestedTopic();
+  const modules = COURSE.map((m) => {
+    if (m.topics.length === 0) {
+      return `<section class="module soon"><h2>${m.title}</h2><p>${m.summary}</p><span class="badge soon">Próximamente</span></section>`;
+    }
+    const rows = m.topics.map((t, i) => topicRow(t, i, next && next.id)).join("");
+    return `<section class="module"><h2>${m.title}</h2><p>${m.summary}</p><div class="rows">${rows}</div></section>`;
+  }).join("");
+
+  const resume = next
+    ? `<a class="resume" href="#/tema/${next.id}"><span class="kicker">Continuar</span><strong>${next.title}</strong><span>${next.summary}</span></a>`
+    : "";
+
+  view.innerHTML = `
+    <header class="masthead">
+      <p class="kicker">Curso</p>
+      <h1>Matemáticas desde cero</h1>
+      <p class="lead">Teoría clara y práctica con pasos. Avanza en el orden que quieras; la app te sugiere cuál sigue.</p>
+    </header>
+    ${resume}
+    ${modules}`;
 }
 
-function startTimer() {
-  if (timer.id !== null) clearInterval(timer.id);
-  timer.id = null;
-  timer.frozen = null;
+function lessonView(id) {
+  const topic = findTopic(id);
+  if (!topic || !isReady(id)) return notFoundView();
+  store.update(id, { read: true });
 
-  if (!els.timerToggle.checked) {
-    els.timer.hidden = true;
-    return;
-  }
-  els.timer.hidden = false;
-  timer.start = performance.now();
-  timer.id = setInterval(tick, 100);
-  tick();
-}
+  const lesson = LESSONS[id];
+  view.innerHTML = `
+    <nav class="crumbs"><a href="#/">← Curso</a></nav>
+    <header class="masthead">
+      <p class="kicker">${topic.module.title}</p>
+      <h1>${topic.title}</h1>
+      <p class="lead">Lectura de unos ${lesson.minutes} minutos, con práctica al final.</p>
+    </header>
+    <article class="lesson">${renderRich(lesson.body)}</article>
+    <p class="fullscreen-link"><a href="#/practica/${id}">Abrir la práctica en pantalla completa →</a></p>`;
 
-function tick() {
-  const seconds = (performance.now() - timer.start) / 1000;
-  els.timer.textContent = `Tiempo: ${formatSeconds(seconds)} s`;
-}
-
-// Freezes the timer at the first valid attempt and returns the time
-function stopTimer() {
-  if (timer.id !== null) {
-    clearInterval(timer.id);
-    timer.id = null;
-    timer.frozen = (performance.now() - timer.start) / 1000;
-    els.timer.textContent = `Tiempo: ${formatSeconds(timer.frozen)} s`;
-  }
-  return timer.frozen;
-}
-
-function showFeedback(message, correct) {
-  els.feedback.textContent = message;
-  els.feedback.className = "feedback" + (correct === true ? " ok" : correct === false ? " bad" : "");
-}
-
-function renderStats() {
-  els.ok.textContent = stats.ok;
-  els.total.textContent = stats.total;
-}
-
-function renderSteps() {
-  els.steps.innerHTML = current.steps
-    .map((step) => `<li>${renderMath(step)}</li>`)
-    .join("");
-}
-
-function newProblem() {
-  current = activeSubtopic.generate({ table: els.table.value, mode: currentMode() });
-  current.counted = false; // only the first valid attempt counts
-
-  els.label.textContent = current.label;
-  els.equation.innerHTML = renderMath(current.equation);
-  els.input.value = "";
-  els.steps.hidden = true;
-  els.steps.innerHTML = "";
-  els.stepsBtn.textContent = "Ver pasos";
-  showFeedback("", null);
-  startTimer();
-  els.input.focus();
-}
-
-function checkAnswer() {
-  if (!current) return;
-
-  const raw = els.input.value.trim();
-  if (raw === "") {
-    showFeedback("Escribe una respuesta.", null);
-    return;
-  }
-  if (!/^-?\d+$/.test(raw)) {
-    showFeedback("Escribe solo un número entero.", null);
-    return;
-  }
-
-  const seconds = stopTimer();
-  const correct = Number(raw) === current.answer;
-
-  if (!current.counted) {
-    current.counted = true;
-    stats.total++;
-    if (correct) stats.ok++;
-    renderStats();
-  }
-
-  const timeNote = seconds !== null && els.timerToggle.checked ? ` (${formatSeconds(seconds)} s)` : "";
-  showFeedback(
-    correct ? `Correcto.${timeNote}` : 'No es correcto. Intenta de nuevo o pulsa "Ver pasos".',
-    correct
-  );
-}
-
-function toggleSteps() {
-  if (els.steps.hidden) {
-    renderSteps();
-    els.steps.hidden = false;
-    els.stepsBtn.textContent = "Ocultar pasos";
-  } else {
-    els.steps.hidden = true;
-    els.stepsBtn.textContent = "Ver pasos";
+  const slot = view.querySelector("[data-practice]");
+  if (slot) {
+    slot.className = "embed";
+    slot.setAttribute("data-no-autofocus", "");
+    mounted = mountPractice(slot, GENERATORS[id], { topicId: id });
   }
 }
 
-// Table selector: mixed, then 2 to 12
-els.table.append(new Option("Mixta (2 a 12)", "mixed"));
-for (let n = 2; n <= 12; n++) {
-  els.table.append(new Option(`Tabla del ${n}`, String(n)));
+function practiceView(id) {
+  const topic = findTopic(id);
+  if (!topic || !isReady(id)) return notFoundView();
+
+  view.innerHTML = `
+    <nav class="crumbs"><a href="#/tema/${id}">← Volver a la lección</a></nav>
+    <header class="masthead"><p class="kicker">Práctica</p><h1>${topic.title}</h1></header>
+    <div id="practice-root"></div>`;
+  mounted = mountPractice(document.getElementById("practice-root"), GENERATORS[id], { topicId: id });
 }
 
-els.form.addEventListener("submit", (event) => {
-  event.preventDefault();
-  checkAnswer();
-});
-els.nextBtn.addEventListener("click", newProblem);
-els.stepsBtn.addEventListener("click", toggleSteps);
-els.table.addEventListener("change", newProblem);
-document.querySelectorAll('input[name="mode"]').forEach((radio) => {
-  radio.addEventListener("change", newProblem);
-});
-els.timerToggle.addEventListener("change", startTimer);
+function notFoundView() {
+  view.innerHTML = '<nav class="crumbs"><a href="#/">← Curso</a></nav><p>Ese tema no existe todavía.</p>';
+}
 
-renderStats();
-newProblem();
+function route() {
+  if (mounted) mounted.destroy();
+  mounted = null;
+
+  const [, page, id] = location.hash.split("/");
+  if (page === "tema") lessonView(id);
+  else if (page === "practica") practiceView(id);
+  else homeView();
+  window.scrollTo(0, 0);
+}
+
+window.addEventListener("hashchange", route);
+route();
