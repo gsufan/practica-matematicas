@@ -1,5 +1,5 @@
-// Cache-first service worker. Bump VERSION to force clients to refresh.
-const VERSION = "v4";
+// Network-first service worker: always fresh online, cached copy offline. Bump VERSION to force clients to refresh.
+const VERSION = "v5";
 const CACHE = "mates-" + VERSION;
 const ASSETS = [
   "./",
@@ -58,6 +58,14 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   event.respondWith(
-    caches.match(event.request).then((hit) => hit || fetch(event.request))
+    fetch(event.request)
+      .then((response) => {
+        if (response.ok && new URL(event.request.url).origin === location.origin) {
+          const copy = response.clone();
+          caches.open(CACHE).then((cache) => cache.put(event.request, copy));
+        }
+        return response;
+      })
+      .catch(() => caches.match(event.request, { ignoreSearch: true }))
   );
 });
