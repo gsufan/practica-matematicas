@@ -13,10 +13,16 @@ function topicRow(topic, index, suggestedId) {
     : '<span class="badge soon">Próximamente</span>';
   const progress = ready && t.total > 0 ? `<span class="row-meta">${t.ok} de ${t.total} correctas</span>` : "";
   const next = topic.id === suggestedId ? '<span class="badge next">Sigue este</span>' : "";
+  const percent = status === "mastered" ? 100 : Math.min(t.total, 10) * 10;
   const inner = `
-    <span class="row-num">${index + 1}</span>
-    <span class="row-text"><strong>${topic.title}</strong><span>${topic.summary}</span>${progress}</span>
-    <span class="row-badges">${next}${badge}</span>`;
+    <span class="row-head">
+      <span class="row-num">${String(index + 1).padStart(2, "0")}</span>
+      <span class="row-badges">${next}${badge}</span>
+    </span>
+    <span class="row-title">${topic.title}</span>
+    <span class="row-sum">${topic.summary}</span>
+    ${progress}
+    <span class="bar" aria-hidden="true"><span style="width:${ready ? percent : 0}%"></span></span>`;
   return ready
     ? `<a class="row" href="#/tema/${topic.id}">${inner}</a>`
     : `<div class="row disabled">${inner}</div>`;
@@ -33,14 +39,19 @@ function homeView() {
   }).join("");
 
   const resume = next
-    ? `<a class="resume" href="#/tema/${next.id}"><span class="kicker">Continuar</span><strong>${next.title}</strong><span>${next.summary}</span></a>`
+    ? `<a class="resume" href="#/tema/${next.id}"><span class="kicker">Continuar</span><strong>${next.title}</strong><span>${next.summary}</span><span class="go">Abrir la lección</span></a>`
     : "";
+
+  const ready = allTopics().filter((t) => isReady(t.id));
+  const mastered = ready.filter((t) => store.status(t.id) === "mastered").length;
+  const percent = ready.length ? Math.round((mastered / ready.length) * 100) : 0;
 
   view.innerHTML = `
     <header class="masthead">
       <p class="kicker">Curso</p>
       <h1>Matemáticas desde cero</h1>
       <p class="lead">Teoría clara y práctica con pasos. Avanza en el orden que quieras; la app te sugiere cuál sigue.</p>
+      <p class="progress-pill">Tu avance <span class="bar" aria-hidden="true"><span style="width:${percent}%"></span></span> <strong>${mastered} de ${ready.length}</strong></p>
     </header>
     ${resume}
     ${modules}`;
