@@ -1,5 +1,5 @@
 // Network-first service worker: always fresh online, cached copy offline. Bump VERSION to force clients to refresh.
-const VERSION = "v10";
+const VERSION = "v11";
 const CACHE = "mates-" + VERSION;
 const ASSETS = [
   "./",
@@ -18,6 +18,18 @@ const ASSETS = [
   "./src/generators/integers.js",
   "./src/generators/number-sets.js",
   "./src/generators/order-of-operations.js",
+  "./src/lessons/fractions.js",
+  "./src/generators/fractions.js",
+  "./src/lessons/decimals.js",
+  "./src/generators/decimals.js",
+  "./src/lessons/percentages.js",
+  "./src/generators/percentages.js",
+  "./src/lessons/powers-roots.js",
+  "./src/generators/powers-roots.js",
+  "./src/lessons/scientific-notation.js",
+  "./src/generators/scientific-notation.js",
+  "./src/lessons/logarithms.js",
+  "./src/generators/logarithms.js",
   "./src/practice.js",
   "./src/app.js",
   "./vendor/katex/katex.min.js",

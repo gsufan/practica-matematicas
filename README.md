@@ -41,5 +41,5 @@ El tema ya está listado en `COURSE` (`src/course.js`). Para activarlo:
 - [x] Aritmética: los números y sus conjuntos
 - [x] Aritmética: enteros y negativos
 - [x] Aritmética: orden de operaciones
-- [ ] Aritmética: fracciones, decimales, porcentajes, potencias, notación científica, logaritmos
+- [x] Aritmética: fracciones, decimales, porcentajes y proporciones, potencias y raíces, notación científica, logaritmos
 - [ ] Módulos posteriores: álgebra, geometría, funciones, álgebra lineal, precálculo, cálculo
