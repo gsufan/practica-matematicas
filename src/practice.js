@@ -132,6 +132,7 @@ function mountPractice(root, generator, { topicId, timer: withTimer = true } = {
     const raw = els.input.value.trim();
     if (raw === "") return showFeedback("Escribe una respuesta.", null);
     const kind = current.kind || "integer";
+    if (kind === "expression") return checkExpression(raw);
     const parsed = parseAnswer(raw, kind);
     if (parsed.error) return showFeedback(parsed.error, null);
 
@@ -149,6 +150,23 @@ function mountPractice(root, generator, { topicId, timer: withTimer = true } = {
     }
     const note = seconds !== null && timerOn ? ` (${fmt(seconds)} s)` : "";
     showFeedback(correct ? `Correcto.${note}` : 'No es correcto. Intenta de nuevo o pulsa "Ver pasos".', correct);
+  }
+
+  // Algebraic answers: compared as polynomials, so 4+5x equals 5x+4
+  function checkExpression(raw) {
+    const parsed = parsePolynomial(raw);
+    if (parsed.error) return showFeedback(parsed.error, null);
+    const equal = polyEqual(parsed.value, current.answer);
+    if (equal && parsed.repeated) return showFeedback("Es equivalente, pero falta reducir los términos semejantes.", null);
+
+    const seconds = stopTimer();
+    if (!current.counted) {
+      current.counted = true;
+      store.recordAttempt(topicId, equal);
+      renderTally();
+    }
+    const note = seconds !== null && timerOn ? ` (${fmt(seconds)} s)` : "";
+    showFeedback(equal ? `Correcto.${note}` : 'No es correcto. Intenta de nuevo o pulsa "Ver pasos".', equal);
   }
 
   els.form.addEventListener("submit", (e) => { e.preventDefault(); checkAnswer(); });

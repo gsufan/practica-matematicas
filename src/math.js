@@ -41,7 +41,9 @@ function renderRich(source) {
       if (text === "{{practice}}") return '<div data-practice></div>';
       if (text.startsWith("## ")) return `<h2>${renderInline(text.slice(3))}</h2>`;
       if (text.startsWith("$$") && text.endsWith("$$")) {
-        return `<div class="display-math">${renderMath(text.slice(2, -2), { display: true })}</div>`;
+        // one display per line, so a derivation can be written on several lines
+        const parts = lines.map((l) => l.trim().replace(/^\$\$|\$\$$/g, ""));
+        return `<div class="display-math">${parts.map((p) => renderMath(p, { display: true })).join("")}</div>`;
       }
       if (lines.every((l) => l.startsWith("- "))) {
         return `<ul>${lines.map((l) => `<li>${renderInline(l.slice(2))}</li>`).join("")}</ul>`;
@@ -91,7 +93,7 @@ function decTex(n, k) {
 // kind: "integer" accepts only whole numbers; "fraction" and "decimal" also accept
 // a/b and decimals with comma or dot ("0,5" and "1/2" are the same value).
 function parseAnswer(raw, kind) {
-  const text = raw.replace(/\s+/g, "").replace(",", ".").replace(/%$/, "");
+  const text = raw.replace(/\s+/g, "").replace(",", ".").replace(/%$/, "").replace(/^[a-z]=/i, "");
   if (/^-?\d+$/.test(text)) return { value: { n: Number(text), d: 1 }, simplified: true };
   if (kind === "integer") return { error: "Escribe solo un número entero." };
 
@@ -122,3 +124,60 @@ function sameValue(a, b) {
   const x = toRational(a), y = toRational(b);
   return x.n === y.n && x.d === y.d;
 }
+
+// ---- Polynomials: plain objects { monomial: coefficient }, "" is the constant ----
+// Monomial keys list variables alphabetically with exponents: "x", "x^2", "xy".
+
+// Student text -> { value, repeated } or { error }. `repeated` is true when two terms
+// of the same kind were written (3x + 2x), that is, the answer is not reduced.
+function parsePolynomial(raw) {
+  const text = raw.toLowerCase().replace(/\s+/g, "").replace(/[−–]/g, "-")
+    .replace(/[·*×]/g, "").replace(/²/g, "^2").replace(/³/g, "^3").replace(/,/g, ".");
+  if (!text) return { error: "Escribe una respuesta." };
+  if (/[()]/.test(text)) return { error: "Escribe la expresión sin paréntesis, ya desarrollada." };
+
+  const terms = text.match(/[+-]?[^+-]+/g);
+  if (!terms || terms.join("") !== text) return { error: "No entiendo esa expresión. Ejemplo: 5x + 4" };
+
+  const value = {};
+  const seen = {};
+  for (const term of terms) {
+    const m = term.match(/^([+-]?)(\d*\.?\d*)((?:[a-z](?:\^\d+)?)*)$/);
+    if (!m || (m[2] === "" && m[3] === "") || m[2] === ".") return { error: "No entiendo esa expresión. Ejemplo: 5x + 4" };
+    const coef = (m[2] === "" ? 1 : Number(m[2])) * (m[1] === "-" ? -1 : 1);
+
+    const powers = {};
+    for (const v of m[3].matchAll(/([a-z])(?:\^(\d+))?/g)) powers[v[1]] = (powers[v[1]] || 0) + Number(v[2] || 1);
+    const key = Object.keys(powers).sort().map((l) => l + (powers[l] > 1 ? `^${powers[l]}` : "")).join("");
+
+    value[key] = (value[key] || 0) + coef;
+    seen[key] = (seen[key] || 0) + 1;
+  }
+  return { value, repeated: Object.values(seen).some((n) => n > 1) };
+}
+
+function polyEqual(a, b) {
+  const clean = (p) => Object.entries(p).filter(([, c]) => Math.abs(c) > 1e-9);
+  const x = clean(a), y = clean(b);
+  return x.length === y.length && x.every(([k, c]) => Math.abs(c - (b[k] || 0)) < 1e-9);
+}
+
+// Monomial key as LaTeX: "x^2y" -> x^{2}y
+const keyTex = (key) => key.replace(/\^(\d+)/g, "^{$1}");
+
+// Polynomial as LaTeX, highest degree first, constant last. Zero terms are skipped.
+function polyTex(poly) {
+  const degree = (k) => [...k.matchAll(/([a-z])(?:\^(\d+))?/g)].reduce((s, m) => s + Number(m[2] || 1), 0);
+  const keys = Object.keys(poly).filter((k) => poly[k] !== 0)
+    .sort((a, b) => degree(b) - degree(a) || (a < b ? -1 : 1));
+  if (keys.length === 0) return "0";
+  return keys.map((k, i) => {
+    const c = poly[k], abs = Math.abs(c);
+    const body = k === "" ? `${abs}` : (abs === 1 ? "" : `${abs}`) + keyTex(k);
+    if (i === 0) return (c < 0 ? "-" : "") + body;
+    return ` ${c < 0 ? "-" : "+"} ${body}`;
+  }).join("");
+}
+
+// Same, but a negative number is wrapped in parentheses: used when substituting values
+const parenNum = (n) => (n < 0 ? `(${n})` : `${n}`);

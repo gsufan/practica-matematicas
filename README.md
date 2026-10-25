@@ -44,4 +44,6 @@ El tema ya está listado en `COURSE` (`src/course.js`). Para activarlo:
 - [x] Aritmética: enteros y negativos
 - [x] Aritmética: orden de operaciones
 - [x] Aritmética: fracciones, decimales, porcentajes y proporciones, potencias y raíces, notación científica, logaritmos
-- [ ] Módulos posteriores: álgebra, geometría, funciones, álgebra lineal, precálculo, cálculo
+- [x] Álgebra: variables y expresiones, términos semejantes, propiedad distributiva, ecuaciones lineales
+- [ ] Álgebra: desigualdades, problemas, sistemas, polinomios, factorización, cuadráticas
+- [ ] Módulos posteriores: geometría, funciones, álgebra lineal, precálculo, cálculo
