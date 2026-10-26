@@ -156,6 +156,59 @@ function parsePolynomial(raw) {
   return { value, repeated: Object.values(seen).some((n) => n > 1) };
 }
 
+// ---- Inequalities and pairs of numbers ----
+
+const FLIP_OP = { "<": ">", ">": "<", "<=": ">=", ">=": "<=" };
+
+// "x > 3", "x<=5/2", "3 < x" -> { op, value: {n,d} } with the variable on the left
+function parseInequality(raw) {
+  const text = raw.replace(/\s+/g, "").replace(/≥/g, ">=").replace(/≤/g, "<=")
+    .replace(/=>/g, ">=").replace(/=</g, "<=").toLowerCase();
+  const hint = "Escribe una desigualdad, por ejemplo x > 3 o x <= 5/2.";
+  let op, bound;
+  let m = text.match(/^([a-z])(<=|>=|<|>)(.+)$/);
+  if (m) {
+    op = m[2];
+    bound = m[3];
+  } else {
+    m = text.match(/^(.+?)(<=|>=|<|>)([a-z])$/);
+    if (!m) return { error: hint };
+    op = FLIP_OP[m[2]];
+    bound = m[1];
+  }
+  const parsed = parseAnswer(bound, "fraction");
+  if (parsed.error) return { error: hint };
+  return { op, value: parsed.value };
+}
+
+// "2, 5", "(3; -2)", "x=3, y=-2" -> { values: [{n,d}, {n,d}] } or { error }.
+// With labels (["x","y"]) a labeled answer may come in either order.
+function parsePair(raw, labels) {
+  const hint = "Escribe dos números separados por coma, por ejemplo 2, 5.";
+  let parts = raw.replace(/[()]/g, "").split(/[,;]/);
+  if (parts.length === 1) parts = raw.replace(/[()]/g, "").trim().split(/\s+/);
+  if (parts.length !== 2) return { error: hint };
+
+  const items = parts.map((part) => {
+    const m = part.trim().match(/^([a-z])\s*=\s*(.+)$/i);
+    const parsed = parseAnswer(m ? m[2] : part.trim(), "fraction");
+    return { label: m ? m[1].toLowerCase() : null, parsed };
+  });
+  if (items.some((it) => it.parsed.error)) return { error: hint };
+
+  let ordered = items;
+  if (labels && items.every((it) => it.label) && items[0].label === labels[1] && items[1].label === labels[0]) {
+    ordered = [items[1], items[0]];
+  }
+  return { values: ordered.map((it) => it.parsed.value) };
+}
+
+function pairEqual(values, answer, unordered) {
+  const [a, b] = values;
+  if (sameValue(a, answer[0]) && sameValue(b, answer[1])) return true;
+  return Boolean(unordered) && sameValue(a, answer[1]) && sameValue(b, answer[0]);
+}
+
 function polyEqual(a, b) {
   const clean = (p) => Object.entries(p).filter(([, c]) => Math.abs(c) > 1e-9);
   const x = clean(a), y = clean(b);

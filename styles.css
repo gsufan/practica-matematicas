@@ -197,6 +197,8 @@ fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
 
 .problem { padding: 28px 24px 24px; }
 .problem-label { margin: 0; font-size: .85rem; font-weight: 700; color: var(--muted); }
+.statement { margin: 10px 0 0; font-size: 1.2rem; font-weight: 700; line-height: 1.5; text-wrap: pretty; }
+.statement[hidden] { display: none; }
 .equation {
   margin: 12px 0 24px; padding: 20px 8px; min-height: 5.5rem;
   display: flex; align-items: center;

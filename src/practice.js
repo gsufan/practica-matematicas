@@ -12,6 +12,7 @@ function mountPractice(root, generator, { topicId, timer: withTimer = true } = {
     <section class="setup" aria-label="Opciones de práctica"></section>
     <article class="problem">
       <p class="problem-label"></p>
+      <p class="statement" hidden></p>
       <div class="equation"></div>
       <form class="answer" autocomplete="off">
         <label for="${uid}-input" class="field">Tu respuesta</label>
@@ -30,7 +31,7 @@ function mountPractice(root, generator, { topicId, timer: withTimer = true } = {
 
   const q = (sel) => root.querySelector(sel);
   const els = {
-    setup: q(".setup"), label: q(".problem-label"), equation: q(".equation"),
+    setup: q(".setup"), label: q(".problem-label"), statement: q(".statement"), equation: q(".equation"),
     form: q(".answer"), input: q(".answer input"), feedback: q(".feedback"),
     stepsBtn: q("[data-steps]"), nextBtn: q("[data-next]"), steps: q(".steps"),
     timer: q(".timer"), ok: q("[data-ok]"), total: q("[data-total]"),
@@ -116,6 +117,8 @@ function mountPractice(root, generator, { topicId, timer: withTimer = true } = {
     current = generator.generate({ ...options });
     current.counted = false; // only the first valid attempt counts
     els.label.textContent = current.label;
+    els.statement.textContent = current.statement || "";
+    els.statement.hidden = !current.statement;
     els.equation.innerHTML = renderMath(current.equation);
     els.input.value = "";
     els.input.inputMode = generator.keyboard || "text";
@@ -132,17 +135,36 @@ function mountPractice(root, generator, { topicId, timer: withTimer = true } = {
     const raw = els.input.value.trim();
     if (raw === "") return showFeedback("Escribe una respuesta.", null);
     const kind = current.kind || "integer";
-    if (kind === "expression") return checkExpression(raw);
-    const parsed = parseAnswer(raw, kind);
-    if (parsed.error) return showFeedback(parsed.error, null);
+    let equal;
 
-    const equal = sameValue(parsed.value, current.answer);
-    if (kind === "fraction" && equal && !parsed.simplified) {
-      return showFeedback("Es equivalente, pero falta simplificar la fracción.", null);
+    if (kind === "expression") {
+      // compared as polynomials, so 4+5x equals 5x+4
+      const parsed = parsePolynomial(raw);
+      if (parsed.error) return showFeedback(parsed.error, null);
+      equal = polyEqual(parsed.value, current.answer);
+      if (equal && parsed.repeated) return showFeedback("Es equivalente, pero falta reducir los términos semejantes.", null);
+    } else if (kind === "inequality") {
+      const parsed = parseInequality(raw);
+      if (parsed.error) return showFeedback(parsed.error, null);
+      equal = parsed.op === current.answer.op && sameValue(parsed.value, current.answer.value);
+    } else if (kind === "pair") {
+      const parsed = parsePair(raw, current.labels);
+      if (parsed.error) return showFeedback(parsed.error, null);
+      equal = pairEqual(parsed.values, current.answer, current.unordered);
+    } else {
+      const parsed = parseAnswer(raw, kind);
+      if (parsed.error) return showFeedback(parsed.error, null);
+      equal = sameValue(parsed.value, current.answer);
+      if (kind === "fraction" && equal && !parsed.simplified) {
+        return showFeedback("Es equivalente, pero falta simplificar la fracción.", null);
+      }
     }
+    grade(equal);
+  }
 
+  // First valid attempt counts; later ones only give feedback
+  function grade(correct) {
     const seconds = stopTimer();
-    const correct = equal;
     if (!current.counted) {
       current.counted = true;
       store.recordAttempt(topicId, correct);
@@ -150,23 +172,6 @@ function mountPractice(root, generator, { topicId, timer: withTimer = true } = {
     }
     const note = seconds !== null && timerOn ? ` (${fmt(seconds)} s)` : "";
     showFeedback(correct ? `Correcto.${note}` : 'No es correcto. Intenta de nuevo o pulsa "Ver pasos".', correct);
-  }
-
-  // Algebraic answers: compared as polynomials, so 4+5x equals 5x+4
-  function checkExpression(raw) {
-    const parsed = parsePolynomial(raw);
-    if (parsed.error) return showFeedback(parsed.error, null);
-    const equal = polyEqual(parsed.value, current.answer);
-    if (equal && parsed.repeated) return showFeedback("Es equivalente, pero falta reducir los términos semejantes.", null);
-
-    const seconds = stopTimer();
-    if (!current.counted) {
-      current.counted = true;
-      store.recordAttempt(topicId, equal);
-      renderTally();
-    }
-    const note = seconds !== null && timerOn ? ` (${fmt(seconds)} s)` : "";
-    showFeedback(equal ? `Correcto.${note}` : 'No es correcto. Intenta de nuevo o pulsa "Ver pasos".', equal);
   }
 
   els.form.addEventListener("submit", (e) => { e.preventDefault(); checkAnswer(); });
