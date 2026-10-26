@@ -133,9 +133,11 @@ function sameValue(a, b) {
 // Student text -> { value, repeated } or { error }. `repeated` is true when two terms
 // of the same kind were written (3x + 2x), that is, the answer is not reduced.
 function parsePolynomial(raw) {
-  const text = raw.toLowerCase().replace(/\s+/g, "").replace(/[−–]/g, "-")
+  let text = raw.toLowerCase().replace(/\s+/g, "").replace(/[−–]/g, "-")
     .replace(/[·*×]/g, "").replace(/²/g, "^2").replace(/³/g, "^3").replace(/,/g, ".");
   if (!text) return { error: "Escribe una respuesta." };
+  // "y = 2x + 3" and "f(x) = 2x + 3" are accepted; only the right-hand side is compared
+  text = text.replace(/^(?:y|[a-z]\(x\))=/, "");
   if (/[()]/.test(text)) return { error: "Escribe la expresión sin paréntesis, ya desarrollada." };
 
   const terms = text.match(/[+-]?[^+-]+/g);
@@ -144,12 +146,14 @@ function parsePolynomial(raw) {
   const value = {};
   const seen = {};
   for (const term of terms) {
-    const m = term.match(/^([+-]?)(\d*\.?\d*)((?:[a-z](?:\^\d+)?)*)$/);
-    if (!m || (m[2] === "" && m[3] === "") || m[2] === ".") return { error: "No entiendo esa expresión. Ejemplo: 5x + 4" };
-    const coef = (m[2] === "" ? 1 : Number(m[2])) * (m[1] === "-" ? -1 : 1);
+    // sign, coefficient (3, 2.5 or 1/2), variables, optional "/n" after them: 3x, 1/2x, x/2
+    const m = term.match(/^([+-]?)(\d*\.?\d*)(?:\/(\d+))?((?:[a-z](?:\^\d+)?)*)(?:\/(\d+))?$/);
+    const bad = !m || (m[2] === "" && m[4] === "") || m[2] === "." || (m[3] && m[2] === "") || m[3] === "0" || m[5] === "0";
+    if (bad) return { error: "No entiendo esa expresión. Ejemplo: 5x + 4" };
+    const coef = ((m[2] === "" ? 1 : Number(m[2])) / (m[3] ? Number(m[3]) : 1) / (m[5] ? Number(m[5]) : 1)) * (m[1] === "-" ? -1 : 1);
 
     const powers = {};
-    for (const v of m[3].matchAll(/([a-z])(?:\^(\d+))?/g)) powers[v[1]] = (powers[v[1]] || 0) + Number(v[2] || 1);
+    for (const v of m[4].matchAll(/([a-z])(?:\^(\d+))?/g)) powers[v[1]] = (powers[v[1]] || 0) + Number(v[2] || 1);
     const key = Object.keys(powers).sort().map((l) => l + (powers[l] > 1 ? `^${powers[l]}` : "")).join("");
 
     value[key] = (value[key] || 0) + coef;

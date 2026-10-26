@@ -1,5 +1,5 @@
 // Network-first service worker: always fresh online, cached copy offline. Bump VERSION to force clients to refresh.
-const VERSION = "v16";
+const VERSION = "v17";
 const CACHE = "mates-" + VERSION;
 const ASSETS = [
   "./",
@@ -71,6 +71,26 @@ const ASSETS = [
   "./src/generators/coordinate-plane.js",
   "./src/lessons/trigonometry.js",
   "./src/generators/trigonometry.js",
+  "./src/lessons/function-basics.js",
+  "./src/generators/function-basics.js",
+  "./src/lessons/linear-function.js",
+  "./src/generators/linear-function.js",
+  "./src/lessons/line-equation.js",
+  "./src/generators/line-equation.js",
+  "./src/lessons/quadratic-function.js",
+  "./src/generators/quadratic-function.js",
+  "./src/lessons/domain-range.js",
+  "./src/generators/domain-range.js",
+  "./src/lessons/transformations.js",
+  "./src/generators/transformations.js",
+  "./src/lessons/piecewise-abs.js",
+  "./src/generators/piecewise-abs.js",
+  "./src/lessons/composition-inverse.js",
+  "./src/generators/composition-inverse.js",
+  "./src/lessons/exponential-function.js",
+  "./src/generators/exponential-function.js",
+  "./src/lessons/logarithmic-function.js",
+  "./src/generators/logarithmic-function.js",
   "./src/practice.js",
   "./src/theme.js",
   "./src/nav.js",

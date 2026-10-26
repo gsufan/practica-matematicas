@@ -73,7 +73,55 @@ const FIG = (() => {
     return map;
   }
 
-  return { rad, at, pts, svg, poly, line, circle, ellipse, dot, text, arc, angleLabel, rightMark, tick, sideLabel, centroid, dir, fit };
+  // Function graph with axes, grid and labelled points.
+  // fns: [{ f, cls: "curve" | "dash" | "mark", from, to }], points: [{ x, y, label, dx, dy, hollow }]
+  let plotCount = 0;
+  function plot({ fns = [], points = [], xmin = -6, xmax = 6, ymin = -6, ymax = 6, w = 320, h = 240, hlines = [], vlines = [] }) {
+    const m = 24;
+    const sx = (w - 2 * m) / (xmax - xmin), sy = (h - 2 * m) / (ymax - ymin);
+    const X = (x) => r1(m + (x - xmin) * sx), Y = (y) => r1(h - m - (y - ymin) * sy);
+    const stepOf = (range) => (range <= 12 ? 1 : range <= 24 ? 2 : range <= 60 ? 5 : Math.ceil(range / 10));
+    const xs = stepOf(xmax - xmin), ys = stepOf(ymax - ymin);
+    const id = `plot${++plotCount}`;
+    const parts = [`<defs><clipPath id="${id}"><rect x="${m}" y="${m}" width="${w - 2 * m}" height="${h - 2 * m}"/></clipPath></defs>`];
+
+    for (let x = Math.ceil(xmin / xs) * xs; x <= xmax; x += xs) parts.push(line([X(x), Y(ymin)], [X(x), Y(ymax)], "grid"));
+    for (let y = Math.ceil(ymin / ys) * ys; y <= ymax; y += ys) parts.push(line([X(xmin), Y(y)], [X(xmax), Y(y)], "grid"));
+
+    const ax = Math.min(Math.max(0, xmin), xmax), ay = Math.min(Math.max(0, ymin), ymax);
+    parts.push(line([X(xmin), Y(ay)], [X(xmax), Y(ay)], "axis"), line([X(ax), Y(ymin)], [X(ax), Y(ymax)], "axis"));
+    parts.push(text(X(xmax) + 2, Y(ay) - 9, "x", "end", "muted"), text(X(ax) + 8, Y(ymax) - 4, "y", "start", "muted"));
+    for (let x = Math.ceil(xmin / xs) * xs; x <= xmax; x += xs) {
+      if (x !== 0 || ax !== 0) parts.push(text(X(x), Y(ay) + 12, String(x), "middle", "muted"));
+    }
+    for (let y = Math.ceil(ymin / ys) * ys; y <= ymax; y += ys) {
+      if (y !== 0) parts.push(text(X(ax) - 7, Y(y), String(y), "end", "muted"));
+    }
+
+    vlines.forEach((x) => parts.push(line([X(x), Y(ymin)], [X(x), Y(ymax)], "dash")));
+    hlines.forEach((y) => parts.push(line([X(xmin), Y(y)], [X(xmax), Y(y)], "dash")));
+
+    fns.forEach((fn) => {
+      const a = fn.from ?? xmin, b = fn.to ?? xmax, n = 240, segs = [];
+      let cur = [];
+      for (let i = 0; i <= n; i++) {
+        const x = a + ((b - a) * i) / n, y = fn.f(x);
+        if (Number.isFinite(y) && Math.abs(y) < 1e4) cur.push([X(x), Y(y)]);
+        else if (cur.length) { segs.push(cur); cur = []; }
+      }
+      if (cur.length) segs.push(cur);
+      segs.forEach((s) => parts.push(`<polyline class="f-${fn.cls || "curve"}" clip-path="url(#${id})" points="${pts(s)}"/>`));
+    });
+
+    points.forEach((p) => {
+      const c = [X(p.x), Y(p.y)];
+      parts.push(`<circle class="${p.hollow ? "f-hollow" : "f-dot"}" cx="${c[0]}" cy="${c[1]}" r="4.5"/>`);
+      if (p.label) parts.push(text(c[0] + (p.dx ?? 10), c[1] + (p.dy ?? -12), p.label, "start", "accent-text"));
+    });
+    return svg(parts.join(""), "Gráfica de una función", w, h);
+  }
+
+  return { rad, at, pts, svg, poly, line, circle, ellipse, dot, text, arc, angleLabel, rightMark, tick, sideLabel, centroid, dir, fit, plot };
 })();
 
 // Figures used inside lessons, by name: {{fig:name}}
@@ -157,6 +205,67 @@ const FIGURES = {
       FIG.text(176, 90, "hipotenusa", "middle", "text"),
     ];
     return FIG.svg(parts.join(""), "Catetos opuesto y adyacente y la hipotenusa respecto del ángulo alfa", 320, 195);
+  },
+
+  "function-machine"() {
+    const box = (x, label) => FIG.poly([[x, 55], [x + 90, 55], [x + 90, 125], [x, 125]]) + FIG.text(x + 45, 90, label, "middle", "accent-text");
+    const parts = [
+      box(115, "f"),
+      FIG.line([20, 90], [115, 90]), FIG.line([205, 90], [300, 90]),
+      FIG.poly([[105, 82], [115, 90], [105, 98]], "fill2"), FIG.poly([[290, 82], [300, 90], [290, 98]], "fill2"),
+      FIG.text(60, 70, "entrada x", "middle", "text"), FIG.text(250, 70, "salida f(x)", "middle", "text"),
+      FIG.text(160, 160, "A cada x le corresponde un solo f(x)", "middle", "muted"),
+    ];
+    return FIG.svg(parts.join(""), "Una función como máquina: entra x y sale f(x)", 320, 180);
+  },
+
+  "linear-graph"() {
+    return FIG.plot({
+      fns: [{ f: (x) => 2 * x - 1 }], xmin: -4, xmax: 5, ymin: -5, ymax: 8, w: 320, h: 230,
+      points: [{ x: 0, y: -1, label: "ordenada b = −1", dx: 10, dy: 14 }, { x: 2, y: 3, label: "(2, 3)" }, { x: 3, y: 5, label: "(3, 5)" }],
+    });
+  },
+
+  parabola() {
+    return FIG.plot({
+      fns: [{ f: (x) => (x - 1) * (x - 1) - 4 }], xmin: -4, xmax: 6, ymin: -6, ymax: 8, w: 320, h: 230, vlines: [1],
+      points: [{ x: 1, y: -4, label: "vértice (1, −4)", dx: 10, dy: 16 }, { x: -1, y: 0, hollow: true }, { x: 3, y: 0, hollow: true }],
+    });
+  },
+
+  "shift-graph"() {
+    return FIG.plot({
+      fns: [{ f: (x) => x * x, cls: "dash" }, { f: (x) => (x - 2) * (x - 2) + 1 }], xmin: -5, xmax: 7, ymin: -2, ymax: 10, w: 320, h: 230,
+      points: [{ x: 0, y: 0, hollow: true }, { x: 2, y: 1, label: "(2, 1)", dx: 10, dy: 14 }],
+    });
+  },
+
+  "exp-graph"() {
+    return FIG.plot({
+      fns: [{ f: (x) => 2 ** x }, { f: (x) => 0.5 ** x, cls: "dash" }], xmin: -4, xmax: 4, ymin: -1, ymax: 9, w: 320, h: 230,
+      points: [{ x: 0, y: 1, label: "(0, 1)", dx: 10, dy: -10 }], hlines: [0],
+    });
+  },
+
+  "log-graph"() {
+    return FIG.plot({
+      fns: [{ f: (x) => Math.log2(x), from: 0.04 }], xmin: -1, xmax: 9, ymin: -3, ymax: 4, w: 320, h: 230, vlines: [0],
+      points: [{ x: 1, y: 0, label: "(1, 0)", dx: 8, dy: -12 }, { x: 2, y: 1, label: "(2, 1)" }, { x: 8, y: 3, label: "(8, 3)", dx: -50, dy: 4 }],
+    });
+  },
+
+  "inverse-graph"() {
+    return FIG.plot({
+      fns: [{ f: (x) => 2 ** x }, { f: (x) => (x > 0 ? Math.log2(x) : NaN), from: 0.04 }, { f: (x) => x, cls: "dash" }],
+      xmin: -3, xmax: 7, ymin: -3, ymax: 7, w: 320, h: 230,
+    });
+  },
+
+  "abs-graph"() {
+    return FIG.plot({
+      fns: [{ f: (x) => Math.abs(x - 1) - 2 }], xmin: -5, xmax: 7, ymin: -4, ymax: 6, w: 320, h: 230,
+      points: [{ x: 1, y: -2, label: "(1, −2)", dx: 10, dy: 14 }],
+    });
   },
 
   "circle-parts"() {

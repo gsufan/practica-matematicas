@@ -214,6 +214,10 @@ fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
 .f-accent { stroke: var(--accent); stroke-width: 3; fill: none; stroke-linecap: round; }
 .f-mark { stroke: var(--muted); stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
 .f-grid { stroke: var(--line); stroke-width: 1; opacity: .7; }
+.f-axis { stroke: var(--ink); stroke-width: 1.6; opacity: .8; }
+.f-curve { stroke: var(--accent); stroke-width: 3; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.f-dash { stroke: var(--muted); stroke-width: 2; fill: none; stroke-dasharray: 6 5; }
+.f-hollow { fill: var(--bg); stroke: var(--accent); stroke-width: 2.5; }
 .f-dot { fill: var(--accent); }
 .f-text { fill: var(--ink); font: 700 14px var(--font); }
 .f-accent-text { fill: var(--accent-strong); font: 800 15px var(--font); }

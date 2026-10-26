@@ -48,4 +48,5 @@ El tema ya está listado en `COURSE` (`src/course.js`). Para activarlo:
 - [x] Álgebra: variables y expresiones, términos semejantes, propiedad distributiva, ecuaciones lineales
 - [x] Álgebra: desigualdades, problemas con ecuaciones, sistemas, polinomios, factorización, ecuaciones cuadráticas
 - [x] Geometría: ángulos, triángulos, perímetro y área, Pitágoras, circunferencia, polígonos, semejanza, cuerpos, plano cartesiano, trigonometría
-- [ ] Módulos posteriores: funciones, álgebra lineal, precálculo, cálculo
+- [x] Funciones: qué es una función, lineal, recta, cuadrática, dominio y recorrido, transformaciones, por partes y valor absoluto, composición e inversa, exponencial, logarítmica
+- [ ] Módulos posteriores: álgebra lineal, precálculo, cálculo
