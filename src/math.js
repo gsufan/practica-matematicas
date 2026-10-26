@@ -39,6 +39,8 @@ function renderRich(source) {
       const text = block.trim();
       const lines = text.split("\n");
       if (text === "{{practice}}") return '<div data-practice></div>';
+      const figure = text.match(/^\{\{fig:([\w-]+)\}\}$/);
+      if (figure) return `<figure class="lesson-fig">${FIGURES[figure[1]]()}</figure>`;
       if (text.startsWith("## ")) return `<h2>${renderInline(text.slice(3))}</h2>`;
       if (text.startsWith("$$") && text.endsWith("$$")) {
         // one display per line, so a derivation can be written on several lines

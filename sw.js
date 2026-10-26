@@ -1,5 +1,5 @@
 // Network-first service worker: always fresh online, cached copy offline. Bump VERSION to force clients to refresh.
-const VERSION = "v15";
+const VERSION = "v16";
 const CACHE = "mates-" + VERSION;
 const ASSETS = [
   "./",
@@ -8,6 +8,7 @@ const ASSETS = [
   "./vendor/fonts/manrope-latin.woff2",
   "./manifest.webmanifest",
   "./src/math.js",
+  "./src/figures.js",
   "./src/store.js",
   "./src/course.js",
   "./src/lessons/times-tables.js",
@@ -50,6 +51,26 @@ const ASSETS = [
   "./src/generators/factoring.js",
   "./src/lessons/quadratics.js",
   "./src/generators/quadratics.js",
+  "./src/lessons/angles.js",
+  "./src/generators/angles.js",
+  "./src/lessons/triangles.js",
+  "./src/generators/triangles.js",
+  "./src/lessons/area-perimeter.js",
+  "./src/generators/area-perimeter.js",
+  "./src/lessons/pythagoras.js",
+  "./src/generators/pythagoras.js",
+  "./src/lessons/circle.js",
+  "./src/generators/circle.js",
+  "./src/lessons/polygons.js",
+  "./src/generators/polygons.js",
+  "./src/lessons/similarity.js",
+  "./src/generators/similarity.js",
+  "./src/lessons/solids.js",
+  "./src/generators/solids.js",
+  "./src/lessons/coordinate-plane.js",
+  "./src/generators/coordinate-plane.js",
+  "./src/lessons/trigonometry.js",
+  "./src/generators/trigonometry.js",
   "./src/practice.js",
   "./src/theme.js",
   "./src/nav.js",

@@ -13,6 +13,7 @@ function mountPractice(root, generator, { topicId, timer: withTimer = true } = {
     <article class="problem">
       <p class="problem-label"></p>
       <p class="statement" hidden></p>
+      <div class="figure" hidden></div>
       <div class="equation"></div>
       <form class="answer" autocomplete="off">
         <label for="${uid}-input" class="field">Tu respuesta</label>
@@ -31,7 +32,7 @@ function mountPractice(root, generator, { topicId, timer: withTimer = true } = {
 
   const q = (sel) => root.querySelector(sel);
   const els = {
-    setup: q(".setup"), label: q(".problem-label"), statement: q(".statement"), equation: q(".equation"),
+    setup: q(".setup"), label: q(".problem-label"), statement: q(".statement"), figure: q(".figure"), equation: q(".equation"),
     form: q(".answer"), input: q(".answer input"), feedback: q(".feedback"),
     stepsBtn: q("[data-steps]"), nextBtn: q("[data-next]"), steps: q(".steps"),
     timer: q(".timer"), ok: q("[data-ok]"), total: q("[data-total]"),
@@ -119,6 +120,8 @@ function mountPractice(root, generator, { topicId, timer: withTimer = true } = {
     els.label.textContent = current.label;
     els.statement.textContent = current.statement || "";
     els.statement.hidden = !current.statement;
+    els.figure.innerHTML = current.figure || "";
+    els.figure.hidden = !current.figure;
     els.equation.innerHTML = renderMath(current.equation);
     els.input.value = "";
     els.input.inputMode = generator.keyboard || "text";

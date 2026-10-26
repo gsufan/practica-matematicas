@@ -15,6 +15,7 @@ index.html                       Shell; loads scripts in order
 styles.css                       Styles (color tokens at the top)
 sw.js, manifest.webmanifest      PWA: offline fallback, installable
 src/math.js                      randInt, renderMath, renderRich (lesson markup)
+src/figures.js                   SVG toolkit and named figures for geometry
 src/store.js                     Progress in localStorage
 src/course.js                    COURSE map, LESSONS and GENERATORS registries
 src/lessons/<topic>.js           Theory for one topic
@@ -46,4 +47,5 @@ El tema ya está listado en `COURSE` (`src/course.js`). Para activarlo:
 - [x] Aritmética: fracciones, decimales, porcentajes y proporciones, potencias y raíces, notación científica, logaritmos
 - [x] Álgebra: variables y expresiones, términos semejantes, propiedad distributiva, ecuaciones lineales
 - [x] Álgebra: desigualdades, problemas con ecuaciones, sistemas, polinomios, factorización, ecuaciones cuadráticas
-- [ ] Módulos posteriores: geometría, funciones, álgebra lineal, precálculo, cálculo
+- [x] Geometría: ángulos, triángulos, perímetro y área, Pitágoras, circunferencia, polígonos, semejanza, cuerpos, plano cartesiano, trigonometría
+- [ ] Módulos posteriores: funciones, álgebra lineal, precálculo, cálculo

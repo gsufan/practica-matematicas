@@ -199,6 +199,25 @@ fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
 .problem-label { margin: 0; font-size: .85rem; font-weight: 700; color: var(--muted); }
 .statement { margin: 10px 0 0; font-size: 1.2rem; font-weight: 700; line-height: 1.5; text-wrap: pretty; }
 .statement[hidden] { display: none; }
+
+/* Geometry figures: drawn in SVG with theme colors */
+.figure { display: flex; justify-content: center; margin: 14px 0 0; padding: 12px; background: var(--bg); border: 1px solid var(--line); border-radius: 18px; }
+.figure[hidden] { display: none; }
+.fig { width: 100%; max-width: 26rem; height: auto; overflow: visible; }
+.lesson-fig { margin: 18px 0; padding: 14px; display: flex; justify-content: center; background: var(--bg); border-radius: 18px; }
+.lesson-fig .fig { max-width: 30rem; }
+.f-line { stroke: var(--ink); stroke-width: 2.2; fill: none; stroke-linecap: round; }
+.f-fill { fill: var(--accent-soft); stroke: var(--ink); stroke-width: 2.2; stroke-linejoin: round; }
+.f-fill2 { fill: var(--track); stroke: var(--ink); stroke-width: 2.2; stroke-linejoin: round; }
+.f-fill3 { fill: var(--line); stroke: var(--ink); stroke-width: 2.2; stroke-linejoin: round; }
+.f-sector { fill: var(--accent); fill-opacity: .45; stroke: var(--ink); stroke-width: 2.2; stroke-linejoin: round; }
+.f-accent { stroke: var(--accent); stroke-width: 3; fill: none; stroke-linecap: round; }
+.f-mark { stroke: var(--muted); stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.f-grid { stroke: var(--line); stroke-width: 1; opacity: .7; }
+.f-dot { fill: var(--accent); }
+.f-text { fill: var(--ink); font: 700 14px var(--font); }
+.f-accent-text { fill: var(--accent-strong); font: 800 15px var(--font); }
+.f-muted { fill: var(--muted); font: 600 12.5px var(--font); }
 .equation {
   margin: 12px 0 24px; padding: 20px 8px; min-height: 5.5rem;
   display: flex; align-items: center;
